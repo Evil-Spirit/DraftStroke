@@ -58,6 +58,10 @@ public class DraftStroke : MonoBehaviour {
 	public Material material;
 	public Material materialDepthOff;
 
+	public DraftStroke() {
+		SetStyle(new StrokeStyle());
+	}
+
 	Mesh CreateMesh(Lines lines, StrokeStyle ss) {
 		var go = new GameObject(lines.style.name);
 		go.transform.SetParent(parent != null ? parent.transform : gameObject.transform, false);
