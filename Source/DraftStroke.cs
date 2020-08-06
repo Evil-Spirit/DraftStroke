@@ -52,7 +52,7 @@ namespace EvilSpirit
                 }
                 foreach (var m in objects)
                 {
-                    DestroyImmediate(m.GetComponent<MeshRenderer>().material);
+                    DestroyImmediate(m.GetComponent<MeshRenderer>().sharedMaterial);
                     DestroyImmediate(m);
                 }
                 objects.Clear();
@@ -233,9 +233,13 @@ namespace EvilSpirit
                     FillMesh(l.Value);
                     l.Value.dirty = false;
                 }
+
                 foreach (var m in l.Value.objects)
                 {
-                    var material = m.GetComponent<MeshRenderer>().material;
+                    // meshrenderer.Material peroperty internally creates a defensive copy
+                    // sharedMaterial does not leak new objects
+                    // this changeg is bad if material is actually shared
+                    var material = m.GetComponent<MeshRenderer>().sharedMaterial;
                     material.SetFloat("_Pixel", (float)pixel);
                     material.SetVector("_CamDir", dir);
                     material.SetVector("_CamRight", right);
