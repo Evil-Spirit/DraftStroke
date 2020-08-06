@@ -24,7 +24,7 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile_instancing				
+			#pragma multi_compile_instancing
 			
 			#include "UnityCG.cginc"
 
@@ -58,21 +58,21 @@
 				v2f o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				float4 projected = UnityObjectToClipPos(float4(v.vertex.xyz, 1.0));
+				float4 projectedTang = UnityObjectToClipPos(float4(v.vertex.xyz + v.tangent.xyz, 1.0));
+				float3 tang = normalize(float3(projectedTang.xy, 0.0) / projectedTang.w - float3(projected.xy, 0.0) / projected.w);
+				tang.x *= _ScreenParams.x / _ScreenParams.y;
 				float scale = length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x));
 				float pixel = projected.w / _ScreenParams.y / scale;
 				float pix = pixel / 2.0;
-				float3 tang = normalize(v.tangent.xyz);
 				float3 dir = mul((float3x3)unity_WorldToObject, (float3)_CamDir);
 				if (all(v.tangent.xyz == float3(0, 0, 0))) {
 					tang = normalize(mul((float3x3)unity_WorldToObject, (float3)_CamRight));
 				}
 				float cap = _Width * pix + feather * pixel;
-				float3 x = tang * cap;
-				float3 y = normalize(cross(dir, tang)) * cap;
+				float3 x = tang * cap / 2.0;
+				float3 y = float3(tang.y, -tang.x, 0.0) * cap;
 
-				float3 pos = v.vertex + v.params.x * x + v.params.y * y;
-
-				o.vertex = UnityObjectToClipPos(pos);
+				o.vertex = UnityObjectToClipPos(v.vertex) + float4(v.params.x * x + v.params.y * y, 0.0);
 				float2 uv = v.uv;
 				uv.x += v.params.x * cap;
 				float len = length(v.tangent.xyz);
