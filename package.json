@@ -4,8 +4,6 @@
   "displayName": "Draft Stroke",
   "description": "Package for CAD style vector drawing.",
   "unity": "2020.1",
-  "dependencies": {
-  },
   "keywords": [
     "vector",
     "CAD",
@@ -15,5 +13,6 @@
     "name": "Alexey Egorov",
     "email": "evilspirit@evilspirit.org",
     "url": "https://github.com/Evil-Spirit/DraftStroke"
-  }
+  },
+  "type": "module"
 }
