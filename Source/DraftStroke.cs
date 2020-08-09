@@ -239,7 +239,10 @@ namespace EvilSpirit
                     // meshrenderer.Material peroperty internally creates a defensive copy
                     // sharedMaterial does not leak new objects
                     // this changeg is bad if material is actually shared
-                    var material = m.GetComponent<MeshRenderer>().sharedMaterial;
+                    // Alexey: Actually I wish to inherit material here, not to use sharedMaterial
+                    // since I need to change current instance parameters. Ofc it can be done through
+                    // using material property block.
+                    var material = m.GetComponent<MeshRenderer>().material;
                     material.SetFloat("_Pixel", (float)pixel);
                     material.SetVector("_CamDir", dir);
                     material.SetVector("_CamRight", right);
@@ -288,6 +291,7 @@ namespace EvilSpirit
             {
                 l.Value.Clear();
             }
+            lines.Clear();
         }
 
         public void ClearStyle(string name)
