@@ -67,9 +67,6 @@ namespace EvilSpirit
             }
         }
 
-        public Material material;
-        public Material materialDepthOff;
-
         public DraftStroke()
         {
             SetStyle(new StrokeStyle());
@@ -80,7 +77,7 @@ namespace EvilSpirit
             var go = new GameObject(lines.style.name);
             go.transform.SetParent(parent != null ? parent.transform : gameObject.transform, false);
             var mr = go.AddComponent<MeshRenderer>();
-            mr.material = ss.depthTest ? material : materialDepthOff;
+            mr.material = new Material(ss.depthTest ? Shader.Find("NoteCAD/DraftLines") : Shader.Find("NoteCAD/DraftLinesDepthOff"));
             lines.material = mr.sharedMaterial;
             var mf = go.AddComponent<MeshFilter>();
             var mesh = new Mesh();
