@@ -74,6 +74,7 @@ namespace EvilSpirit
         public static bool operator ==(StrokeStyle a, StrokeStyle b)
         {
             if (object.ReferenceEquals(a, b)) return true;
+			if(object.ReferenceEquals(a, null) || object.ReferenceEquals(b, null)) return false;
             return
                 a.width == b.width &&
                 //a.stippleWidth == b.stippleWidth &&
