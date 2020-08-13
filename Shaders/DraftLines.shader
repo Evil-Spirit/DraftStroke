@@ -15,12 +15,15 @@
 	}
 	
 	SubShader {
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType" = "Transparent" }
 		LOD 100
-		AlphaToMask On
+		//AlphaToMask On
+		//ZWrite Off
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass {
 			Offset -1, -1
+			Cull Off
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -59,8 +62,10 @@
 				v2f o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				float4 projected = UnityObjectToClipPos(float4(v.vertex.xyz, 1.0));
-				float4 projectedTang = UnityObjectToClipPos(float4(v.vertex.xyz + v.tangent.xyz, 1.0));
-				float3 tang = normalize(float3(projectedTang.xy, 0.0) / projectedTang.w - float3(projected.xy, 0.0) / projected.w);
+				float4 projectedTang = UnityObjectToClipPos(float4(v.vertex.xyz + normalize(v.tangent.xyz), 1.0));
+				float3 tang = projectedTang.xyz / projectedTang.w - projected.xyz / projected.w;
+				if((projected.w >= 0) != (projectedTang.w >= 0)) tang = -tang;
+				tang = tang / length(tang.xy);
 				tang.x *= _ScreenParams.x / _ScreenParams.y;
 				float scale = length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x));
 				float pixel = projected.w / _ScreenParams.y;
@@ -70,8 +75,8 @@
 					tang = normalize(mul((float3x3)unity_WorldToObject, (float3)_CamRight));
 				}
 				float cap = _Width * pix + feather * pixel;
-				float3 x = tang * cap / 2.0;
-				float3 y = float3(tang.y, -tang.x, 0.0) * cap;
+				float3 x = float3(0.0, 0.0, 0.0);//tang * cap / 2.0;
+				float3 y = cross(tang, float3(0.0, 0.0, 1.0)) * cap;
 
 				o.vertex = UnityObjectToClipPos(v.vertex) + float4(v.params.x * x + v.params.y * y, 0.0);
 				float2 uv = v.uv;
@@ -95,7 +100,7 @@
 				float pat = val * patternScale / (_Width * pix);
 				float c = (_Width / 2.0 + feather) / (_Width / 2.0);
 				float cap = (max(i.cap.x - i.cap.y, 0.0) - min(i.cap.x, 0.0)) * c;
-				float dist = length(float2(max(cap, pat), i.uv.y * c));
+				float dist = abs(i.uv.y * c);//length(float2(max(cap, pat), i.uv.y * c));
 
 				float f = 2.0 * feather / (_Width / 2.0 + feather);
 				float k = smoothstep(1.0 - f, 1.0+ f, dist);
