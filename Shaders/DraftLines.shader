@@ -71,7 +71,8 @@
 				float scale = length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x));
 				float pixel = projected.w / _ScreenParams.y;
 				float pix = pixel / 2.0;
-				float3 dir = mul((float3x3)unity_WorldToObject, (float3)_CamDir);
+				// dir does not get used
+				//float3 dir = mul((float3x3)unity_WorldToObject, (float3)_CamDir);
 				if (all(v.tangent.xyz == float3(0, 0, 0))) {
 					tang = normalize(mul((float3x3)unity_WorldToObject, (float3)_CamRight));
 				}

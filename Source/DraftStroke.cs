@@ -8,9 +8,11 @@ namespace EvilSpirit
 {
     public class DraftStroke : MonoBehaviour
     {
-
         public StrokeStyles strokeStyles;
         public GameObject parent;
+
+        Camera _camera;
+        Camera Camera => _camera != null ? _camera : (_camera = Camera.main);
 
         struct Line
         {
@@ -77,12 +79,12 @@ namespace EvilSpirit
             var go = new GameObject(lines.style.name);
             go.transform.SetParent(parent != null ? parent.transform : gameObject.transform, false);
             var mr = go.AddComponent<MeshRenderer>();
-            mr.material = new Material(ss.depthTest ? Shader.Find("NoteCAD/DraftLines") : Shader.Find("NoteCAD/DraftLinesDepthOff"));
+            mr.sharedMaterial = new Material(ss.depthTest ? Shader.Find("NoteCAD/DraftLines") : Shader.Find("NoteCAD/DraftLinesDepthOff"));
             lines.material = mr.sharedMaterial;
             var mf = go.AddComponent<MeshFilter>();
             var mesh = new Mesh();
             mesh.name = "lines";
-            mf.mesh = mesh;
+            mf.sharedMesh = mesh;
             lines.objects.Add(go);
             lines.meshes.Add(mesh);
             return mesh;
@@ -209,7 +211,7 @@ namespace EvilSpirit
         public double getPixelSize()
         {
             var transformScale = transform.localToWorldMatrix.GetColumn(0).magnitude;
-            return 1.0 / (Camera.main.nonJitteredProjectionMatrix.GetColumn(0).magnitude * transformScale) / (double)Camera.main.pixelWidth * 2.0;
+            return 1.0 / (Camera.nonJitteredProjectionMatrix.GetColumn(0).magnitude * transformScale) / (double)Camera.pixelWidth * 2.0;
         }
         /*
         public static double getPixelSize() {
@@ -220,8 +222,10 @@ namespace EvilSpirit
         public void UpdateDirty()
         {
             var pixel = getPixelSize();
-            Vector4 dir = Camera.main.transform.forward.normalized;
-            Vector4 right = Camera.main.transform.right.normalized;
+            // These seem unnecesary. Dir is not used in shader
+            // Right is used but in a special case, not sure how necessary.
+            // Vector4 dir = Camera.transform.forward.normalized;
+            // Vector4 right = Camera.transform.right.normalized;
             foreach (var l in lines)
             {
                 var style = l.Key;
@@ -239,10 +243,16 @@ namespace EvilSpirit
                     // Alexey: Actually I wish to inherit material here, not to use sharedMaterial
                     // since I need to change current instance parameters. Ofc it can be done through
                     // using material property block.
-                    var material = m.GetComponent<MeshRenderer>().material;
+
+                    // You are creating one unique material per Lines object, so both .material and
+                    // .sharedMaterial should return the same instance, but .material will check 
+                    // to see if anyother objects share this material. I still would rather use
+                    // .sharedMaterial and guarantees you're not leaking materials
+
+                    var material = m.GetComponent<MeshRenderer>().sharedMaterial;
                     material.SetFloat("_Pixel", (float)pixel);
-                    material.SetVector("_CamDir", dir);
-                    material.SetVector("_CamRight", right);
+                    //material.SetVector("_CamDir", dir);
+                    //material.SetVector("_CamRight", right);
                     material.SetFloat("_Width", (float)(style.width * style.scale(pixel)));
                     material.SetFloat("_StippleWidth", (float)(style.dashesScale(pixel)));
                     material.SetFloat("_PatternLength", style.GetPatternLength());
@@ -277,10 +287,12 @@ namespace EvilSpirit
             currentLines.AddLine(a, b);
         }
 
-        private void LateUpdate()
-        {
-            UpdateDirty();
-        }
+        // As mentioned above, view dependent parameters don't seem necessary
+        // so no need for update on every frame?
+        //private void LateUpdate()
+        //{
+        //     UpdateDirty();
+        //}
 
         public void Clear()
         {

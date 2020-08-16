@@ -146,11 +146,16 @@ namespace EvilSpirit
         {
             return name.GetHashCode();
         }
-
     }
 
-    public class StrokeStyles : MonoBehaviour
-    {
-        public StrokeStyle[] styles = new StrokeStyle[0];
-    }
+    //public class StrokeStyles : MonoBehaviour
+    //{
+    //    public StrokeStyle[] styles = new StrokeStyle[0];
+    //}
+
+	[CreateAssetMenu(fileName = "DraftStroke", menuName = "DraftStroke/StrokeStyles", order = 1)]
+	public class StrokeStyles : ScriptableObject
+	{
+		public StrokeStyle[] styles = new StrokeStyle[0];
+	}
 }
