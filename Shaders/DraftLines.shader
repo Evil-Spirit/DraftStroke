@@ -22,7 +22,7 @@
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass {
-			Offset -1, -1
+			//Offset -1, -1
 			Cull Off
 			//ZTest Always
 			CGPROGRAM
@@ -80,7 +80,10 @@
 				float3 x = float3(0.0, 0.0, 0.0);//tang * cap / 2.0;
 				float3 y = cross(tang, float3(0.0, 0.0, 1.0)) * cap;
 
-				o.vertex = UnityObjectToClipPos(v.vertex) + float4(v.params.x * x + v.params.y * y, 0.0);
+				o.vertex = projected + float4(v.params.x * x + v.params.y * y, 0.0);
+				
+				// some depth offset depending on width of line
+				o.vertex.z += _Width / 4.0 / _ScreenParams.y;
 				float2 uv = v.uv;
 				uv.x += v.params.x * cap;
 				float len = length(v.tangent.xyz) * scale;
